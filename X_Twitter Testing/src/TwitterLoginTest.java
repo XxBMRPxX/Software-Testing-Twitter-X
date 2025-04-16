@@ -6,15 +6,6 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 import java.time.Duration;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.Files;
-import java.time.Duration;
-import java.util.List;
-import java.util.Set;
 
 public class TwitterLoginTest {
     WebDriver driver;
@@ -31,133 +22,133 @@ public class TwitterLoginTest {
     @Test(priority = 1)
     public void testTwitterLogin() throws InterruptedException {
         driver.get("https://twitter.com/login");
-        Thread.sleep(2000);
 
-        // Step 1: Try invalid username
+        // Step 1: Enter username
         WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("text")));
-        usernameField.sendKeys("RatedX_CEN4073");
-        //Thread.sleep(1000);
+        usernameField.sendKeys("RatedX_CEN4072"); // Use your actual valid username
+        Thread.sleep(1000);
         driver.findElement(By.xpath("//span[text()='Next']")).click();
-        //Thread.sleep(2000);
 
-        // Step 2: Use valid username
-        usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("text")));
-        usernameField.sendKeys("RatedX_CEN4072"); // Replace with actual valid username
-        //Thread.sleep(1000);
-        driver.findElement(By.xpath("//span[text()='Next']")).click();
-        //Thread.sleep(2000);
+        // Step 2 (Optional): If Twitter asks for email or phone confirmation
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            WebElement emailField = shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.name("text")));
+            emailField.sendKeys("jmdominguez8203@eagle.fgcu.edu");
+            Thread.sleep(1000);
+            driver.findElement(By.xpath("//span[text()='Next']")).click();
+        } catch (TimeoutException e) {
+            // No email confirmation step, continue to password
+        }
 
-        // Step 3: Enter invalid password
+        // Step 3: Enter password
         WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("password")));
-        passwordField.sendKeys("ThisIsClearlyTheWrongPasswordBecauseOfHowLongItIs");
-        //Thread.sleep(1000);
+        passwordField.sendKeys("CEN4072!"); // Use actual password
+        Thread.sleep(1000);
         driver.findElement(By.xpath("//span[text()='Log in']")).click();
-        //Thread.sleep(2000);
 
-        passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("password")));
-        passwordField.sendKeys("CEN4072!"); // Replace with actual
-        //Thread.sleep(1000);
-        driver.findElement(By.xpath("//span[text()='Log in']")).click();
-        //Thread.sleep(3000);
-
+        // Step 4: Assert login success
         boolean isHomeVisible = wait.until(ExpectedConditions.urlContains("/home"));
         Assert.assertTrue(isHomeVisible, "Login failed or home page not loaded.");
     }
 
-
     @Test(priority = 2)
-    public void testSearchFollowNotifyLikeFGCU() throws InterruptedException {
-        // Step 1: Wait for home page
-        wait.until(ExpectedConditions.urlContains("/home"));
-
-        // Step 2: Search for FGCU
-        WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//input[@aria-label='Search query']")));
-        searchInput.sendKeys("Florida Gulf Coast University");
-        Thread.sleep(2000);
-        searchInput.sendKeys(Keys.ARROW_DOWN);
+    public void testTwitterLogout() throws InterruptedException {
+        // Step 1: Click on the profile icon to open the logout menu
+        WebElement profileButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//*[@id='react-root']/div/div/div[2]/header/div/div/div/div[2]/div/button/div[2]/div/div[2]/div/div/div/span")));
         Thread.sleep(1000);
-        searchInput.sendKeys(Keys.ARROW_DOWN);
+        profileButton.click();
+
+        // Step 2: Click the "Log out" option from the dropdown
+        WebElement logoutOption = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//*[@id=\"layers\"]/div[2]/div/div/div[2]/div/div[2]/div/div/div/div/div/a[2]/div[1]/div")));
         Thread.sleep(1000);
-        searchInput.sendKeys(Keys.ENTER);
-        Thread.sleep(3000); // Wait for profile page
+        logoutOption.click();
 
-        // Step 3: Follow the account if not already followed
-        List<WebElement> followBtns = driver.findElements(By.xpath("//div[@data-testid='placementTracking']//span[text()='Follow']"));
-        if (!followBtns.isEmpty()) {
-            followBtns.get(0).click();
-            System.out.println("Follow button clicked.");
-            Thread.sleep(2000);
-        } else {
-            System.out.println("Already following or Follow button not found.");
-        }
+        // Step 3: Confirm logout from the popup
+        WebElement confirmLogoutButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//*[@id=\"layers\"]/div[2]/div/div/div/div/div/div[2]/div[2]/div[2]/button[1]/div/span/span")));
+        Thread.sleep(1000);
+        confirmLogoutButton.click();
 
-        // Step 4: Turn on notifications
-        try {
-            WebElement notifyBtn = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//*[@id=\"react-root\"]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[1]/div[2]/div[1]/button")));
-            notifyBtn.click();
-            System.out.println("Notifications turned on.");
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            System.out.println("Notification bell not found or already enabled.");
-        }
+        // Step 4: Validate that we are back on the login page
+        boolean isLoginPage = wait.until(ExpectedConditions.urlContains("/logout"));
+        Assert.assertTrue(isLoginPage, "Logout failed or login page not reached.");
 
-        // Step 5: Like the first post
-        try {
-            WebElement firstLikeButton = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//*[@id=\"id__eq0e95ftlln\"]/div[3]/button/div/div[1]/svg/g/path")));
-            firstLikeButton.click();
-            System.out.println("First post liked.");
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            System.out.println("Unable to like the first post.");
-        }
-
-        // Step 6: Verify on FGCU profile
-        WebElement profileHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//h2[contains(text(),'Florida Gulf Coast University')]")));
-        Assert.assertTrue(profileHeader.isDisplayed(), "FGCU profile page did not load.");
+        //Step 5: Return to login page
+        WebElement SignInButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//*[@id=\"react-root\"]/div/div/div[2]/main/div/div/div[1]/div[1]/div/div[3]/div[4]/a/div/span/span")));
+        Thread.sleep(1000);
+        SignInButton.click();
     }
-
-
-
 
     @Test(priority = 3)
     public void testInvalidLogin() throws InterruptedException {
-        driver.get("https://twitter.com/login");
-        Thread.sleep(2000);
 
+        // Step 1: Try invalid username
         WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("text")));
-        usernameField.sendKeys("invalid_user");
-        driver.findElement(By.xpath("//span[text()='Next']")).click();
+        usernameField.sendKeys("NotARealUser34072");
         Thread.sleep(2000);
+        driver.findElement(By.xpath("//span[text()='Next']")).click();
 
+        // Step 2: Enter valid username after failure
+        usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("text")));
+        usernameField.clear(); // Clear the previous entry
+        usernameField.sendKeys("RatedX_CEN4072");
+        Thread.sleep(2000);
+        driver.findElement(By.xpath("//span[text()='Next']")).click();
+
+        // Step 3: Enter invalid password
         WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("password")));
         passwordField.sendKeys("invalid_pass");
+        Thread.sleep(2000);
         driver.findElement(By.xpath("//span[text()='Log in']")).click();
-        Thread.sleep(3000);
 
-        WebElement error = driver.findElement(By.xpath("//*[contains(text(),'could not')]"));
+        // Step 4: Assert error message is displayed
+        WebElement error = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//*[contains(text(),'could not') or contains(text(),'Wrong Password')]")
+        ));
         Assert.assertTrue(error.isDisplayed(), "Error message not displayed for invalid login.");
     }
 
+
     @Test(priority = 4)
-    public void testForgotPasswordLink() {
-        driver.get("https://twitter.com/login");
-        WebElement forgotPasswordLink = driver.findElement(By.linkText("Forgot password?"));
+    public void testForgotPasswordLink() throws InterruptedException {
+        // Click "Forgot password?"
+        WebElement forgotPasswordLink = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//span[text()='Forgot password?']/ancestor::button")
+        ));
         Assert.assertTrue(forgotPasswordLink.isDisplayed(), "Forgot password link is not visible.");
         forgotPasswordLink.click();
+
+
+
+        // Click "Next" button
+        WebElement nextButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//*[@id=\"layers\"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div[2]/div[2]/div/div/div/button/div")
+        ));
+        nextButton.click();
     }
+
 
     @Test(priority = 5)
-    public void testRememberMeCheckboxIfPresent() {
+    public void testSignUpButton() throws InterruptedException {
         driver.get("https://twitter.com/login");
 
-        // Just a placeholder — Twitter login may not have a checkbox; adapt if necessary
-        boolean rememberMeExists = driver.findElements(By.name("remember_me")).size() > 0;
-        System.out.println("Remember Me checkbox exists: " + rememberMeExists);
+        // Wait for the "Don't have an account? Sign up" section to load
+        WebElement signUpButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//span[text()='Sign up']")));
+        Thread.sleep(1000);
+
+        signUpButton.click();
+        Thread.sleep(2000);
+
+        // Optional: wait and verify that you're now on the SignUp page
+        boolean isSignUpPage = wait.until(ExpectedConditions.urlContains("/i/flow/signup"));
+        Assert.assertTrue(isSignUpPage, "Sign Up page did not load as expected.");
     }
+
+
 
     @AfterClass
     public void tearDown() {
