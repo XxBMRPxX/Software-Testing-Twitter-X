@@ -87,7 +87,7 @@ public class TwitterSearchFunctionality {
         Thread.sleep(1000);
 
         // Select all and delete
-        searchInput.sendKeys(Keys.chord(Keys.COMMAND, "a")); // or Keys.COMMAND for Mac
+        searchInput.sendKeys(Keys.chord(Keys.CONTROL, "a")); // or Keys.COMMAND for Mac
         searchInput.sendKeys(Keys.DELETE);
         Thread.sleep(2000);
 
@@ -121,7 +121,7 @@ public class TwitterSearchFunctionality {
         WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//input[@aria-label='Search query']")));
         searchInput.click();
-        searchInput.sendKeys(Keys.chord(Keys.COMMAND, "a"));
+        searchInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
         searchInput.sendKeys(Keys.DELETE);
         Thread.sleep(1000);
 
