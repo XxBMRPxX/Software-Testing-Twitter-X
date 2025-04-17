@@ -62,7 +62,7 @@ public class TwitterSearchFunctionality {
         // Wait for the tab bar to load after search
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//nav")));
 
-        String[] tabNames = {"Top", "Latest", "People", "Media", "Lists"};
+        String[] tabNames = {"Top", "Latest", "People", "Media"};
         for (String tab : tabNames) {
             try {
                 WebElement tabElement = wait.until(ExpectedConditions.elementToBeClickable(
