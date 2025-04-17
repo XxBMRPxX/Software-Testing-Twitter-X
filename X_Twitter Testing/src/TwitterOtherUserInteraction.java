@@ -7,7 +7,7 @@ import org.testng.annotations.*;
 
 import java.time.Duration;
 
-public class OtherUserInteraction {
+public class TwitterOtherUserInteraction {
     WebDriver driver;
     WebDriverWait wait;
 
